@@ -2,6 +2,9 @@
 id: 04
 dependencies:
 - 01
+status: in-progress
+owner: s-a41c
+branch: task/2026-11-09-video-slicer-skill-04
 ---
 
 # Task 04: Build candidates

@@ -2,6 +2,9 @@
 id: 05
 dependencies:
 - 01
+status: in-progress
+owner: s-a41c
+branch: task/2026-11-09-video-slicer-skill-05
 ---
 
 # Task 05: Export slices

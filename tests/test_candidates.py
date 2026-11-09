@@ -1,0 +1,81 @@
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+import candidates
+from media import run_ffmpeg
+
+SCRIPT = Path(candidates.__file__)
+CROP = "800:600:50:40"
+CLI_TIMEOUT = 180
+BLUE = (0x20, 0x20, 0x80)
+COLOR_TOLERANCE = 12
+
+
+def segs(*pairs):
+    return [{"start": s, "end": e} for s, e in pairs]
+
+
+def test_frame_time_is_half_second_before_end():
+    assert candidates.build_candidates(segs((5.0, 9.96)))[0]["frame_time"] == 9.46
+
+
+def test_frame_time_of_short_segment_is_start():
+    assert candidates.build_candidates(segs((5.0, 5.3)))[0]["frame_time"] == 5.0
+
+
+def test_ninth_candidate_wraps_to_second_row():
+    result = candidates.build_candidates(segs(*[(i * 3, i * 3 + 2) for i in range(9)]), columns=8)
+    assert (result[8]["number"], result[8]["row"], result[8]["column"]) == (9, 1, 0)
+    assert result[8]["file"] == "candidates/0009.png"
+
+
+def run_cli(*args):
+    return subprocess.run([sys.executable, str(SCRIPT), *map(str, args)],
+                          capture_output=True, text=True, timeout=CLI_TIMEOUT)
+
+
+def pixel(path, x, y):
+    out = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(path), "-vf", f"crop=1:1:{x}:{y}",
+         "-f", "rawvideo", "-pix_fmt", "rgb24", "-"],
+        capture_output=True, timeout=30).stdout
+    return tuple(out)
+
+
+def test_cli_writes_cropped_frames_sheet_and_map(synthetic_talk, tmp_path):
+    (tmp_path / "segments.json").write_text(json.dumps(segs((0, 9.96), (10, 19.96), (20, 30))))
+    result = run_cli(synthetic_talk, "--workdir", tmp_path, "--crop", CROP)
+    assert result.returncode == 0, result.stderr
+    assert "row 0 column 1: #2 00:00:10" in result.stdout
+    data = json.loads((tmp_path / "candidates.json").read_text())
+    assert [c["number"] for c in data] == [1, 2, 3]
+    assert (tmp_path / "contact-sheet.png").exists()
+    blue = tmp_path / data[1]["file"]
+    size = run_ffmpeg(["-i", blue, "-f", "null", "-"], 30)
+    assert "800x600" in size
+    assert all(abs(a - b) <= COLOR_TOLERANCE for a, b in zip(pixel(blue, 10, 10), BLUE))
+
+
+def test_contact_sheet_holds_many_candidates(synthetic_talk, tmp_path):
+    count = 50
+    (tmp_path / "segments.json").write_text(
+        json.dumps(segs(*[(i * 0.5, i * 0.5 + 1) for i in range(count)])))
+    assert run_cli(synthetic_talk, "--workdir", tmp_path, "--crop", CROP).returncode == 0
+    info = run_ffmpeg(["-i", tmp_path / "contact-sheet.png", "-f", "null", "-"], 30)
+    cols, rows = candidates.GRID_COLUMNS, 7
+    width = candidates.THUMBNAIL_WIDTH * cols
+    assert f"{width}x{rows * 240}" in info
+
+
+@pytest.mark.parametrize("content", [None, "[]", "not json"])
+def test_bad_segments_file_fails_briefly(synthetic_talk, tmp_path, content):
+    if content is not None:
+        (tmp_path / "segments.json").write_text(content)
+    result = run_cli(synthetic_talk, "--workdir", tmp_path, "--crop", CROP)
+    assert result.returncode != 0
+    assert "Traceback" not in result.stderr
+    assert result.stderr.startswith("error:")

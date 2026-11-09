@@ -23,6 +23,10 @@ One crop box is used for the whole video. If the samples show other slide layout
 
 Limit: slides shown for under 2 s (for example flipped through quickly) get no candidate. Lower `--min-seconds` in `detect.py` finds them but multiplies the candidates.
 
+## Evaluation
+
+Two recordings were checked against the PDFs of their talks, two blind runs each. Video 1: all 30 pages found in both runs (the other 7 of 37 are repeats, a build step and Q&A, dropped by rule). Video 2: 26 of 34 pages found in both runs; the 8 missed pages are six slides shown under 2 s each. Details: `.agents/changes/2026-11-09-second-video-evaluation/results/after-fixes.md`.
+
 ## Tests
 
 ```bash

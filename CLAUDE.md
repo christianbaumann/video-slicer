@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Implemented. Design and evaluation results: `.agents/changes/2026-11-09-video-slicer-skill/design.md`.
+Implemented. Design and evaluation results: `.agents/changes/2026-11-09-video-slicer-skill/design.md`. Evaluation on two recordings against reference PDFs: `.agents/changes/2026-11-09-second-video-evaluation/results/` (`after-fixes.md` has the final numbers).
 
 ## Commands
 
@@ -36,4 +36,4 @@ Pipeline:
 
 ## Test data
 
-The real test recording is in the `music-transcriber` repo under `testdata/`. Read it only: write nothing into that repo.
+The two real test recordings (Tesena Fest talk, OpenRewrite meet-up talk) and their reference PDFs are in the `music-transcriber` repo under `testdata/`. Read it only: write nothing into that repo.

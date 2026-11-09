@@ -1,0 +1,41 @@
+<mxGraphModel dx="1000" dy="600" grid="0" page="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="base" value="&lt;b&gt;1. Baseline&lt;/b&gt;&lt;br&gt;Skill frozen at b77c7c0&lt;br&gt;Blind runs, videos 1 and 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="0" y="0" width="200" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="judge" value="&lt;b&gt;2. Judge&lt;/b&gt;&lt;br&gt;Fresh Claude agent&lt;br&gt;Compares PNGs with PDF pages" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="260" y="0" width="210" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="class" value="&lt;b&gt;3. Assign each error&lt;/b&gt;&lt;br&gt;to one pipeline step" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="530" y="0" width="190" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="fix" value="&lt;b&gt;4. One fix&lt;/b&gt;&lt;br&gt;Largest error class first" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="780" y="0" width="170" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="reg" value="&lt;b&gt;5. Re-run both videos&lt;/b&gt;&lt;br&gt;Stop when targets are met" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="0" width="190" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1" value="&lt;b&gt;Crop&lt;/b&gt;&lt;br&gt;Content cut, border inside&lt;br&gt;SKILL.md step 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="130" y="170" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" value="&lt;b&gt;Detection&lt;/b&gt;&lt;br&gt;Page has no candidate&lt;br&gt;detect.py settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="380" y="170" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" value="&lt;b&gt;Frame choice&lt;/b&gt;&lt;br&gt;Candidate shows wrong moment&lt;br&gt;candidates.py frame_time" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="630" y="170" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4" value="&lt;b&gt;Review&lt;/b&gt;&lt;br&gt;Wrong keep or drop&lt;br&gt;SKILL.md step 5, sheet size" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="880" y="170" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="base" target="judge" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="judge" target="class" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="class" target="fix" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" source="fix" target="reg" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" source="class" target="c1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" source="class" target="c2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" source="class" target="c3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" source="class" target="c4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluation tasks</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 1040px; margin: 0 auto; padding: 24px 16px; color: #222; background: #fff; }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  h2 { font-size: 18px; margin-top: 32px; }
+  img { max-width: 100%; height: auto; display: block; margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+  pre { background: #f5f5f5; padding: 12px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>Proposed task split</h1>
+
+<h2>Task dependencies</h2>
+<p>Tasks 01, 02 and 03 can run in parallel. Each owns different files. The baseline tasks run an export of commit <code>b77c7c0</code>, so task 03 can change <code>SKILL.md</code> at the same time.</p>
+<img src="tasks.png" alt="Tasks 01 Baseline video 1, 02 Baseline video 2 and 03 Demo frame rule have no dependencies. All three block task 04 Fix loop and final results.">
+
+<h2>Tasks</h2>
+<table>
+  <tr><th>Task</th><th>Outcome</th><th>Main files</th><th>Depends on</th></tr>
+  <tr><td>01 Baseline video 1</td><td>Two blind runs and judge tables for the Tesena recording</td><td><code>results/baseline-video-1.md</code></td><td>None</td></tr>
+  <tr><td>02 Baseline video 2</td><td>Two blind runs and judge tables for the OpenRewrite recording</td><td><code>results/baseline-video-2.md</code></td><td>None</td></tr>
+  <tr><td>03 Demo frame rule</td><td>Review drops IDE, terminal and browser frames</td><td><code>SKILL.md</code> step 5</td><td>None</td></tr>
+  <tr><td>04 Fix loop and final results</td><td>Fixes from the error lists, re-runs of both videos, final table</td><td><code>SKILL.md</code>, scripts and tests if needed, <code>results/after-fixes.md</code>, <code>CLAUDE.md</code>, <code>README.md</code></td><td>01, 02, 03</td></tr>
+</table>
+<p><code>results/</code> is in this change folder.</p>
+
+<h2>Proposed result format (addition to design.md)</h2>
+<pre>## Run 1
+
+Crop: W:H:X:Y | Segments: N | Candidates: N | Exported: N
+Crop check: pass or fail, with reason
+
+| Reference page | Status | PNG or candidate | Error step |
+|---|---|---|---|
+| 5 | found | 0005_00-03-12.png | |
+| 18 | rule conflict: build step | #21 | |
+| 23 | review error | #40 | review |
+
+| PNG with no reference page | Class |
+|---|---|
+| 0001_00-00-04.png | host slide or extra |
+
+Totals: found, missed, not shown, rule conflict, extra</pre>
+</body>
+</html>

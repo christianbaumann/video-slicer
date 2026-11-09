@@ -45,10 +45,13 @@ def load_segments(workdir):
 
 
 def extract_frames(video, workdir, crop, candidates):
-    (workdir / "candidates").mkdir(exist_ok=True)
+    directory = workdir / "candidates"
+    directory.mkdir(exist_ok=True)
+    for stale in directory.glob("*.png"):
+        stale.unlink()
     for candidate in candidates:
         run_ffmpeg(
-            ["-ss", candidate["frame_time"], "-i", video, "-vf", f"crop={crop}",
+            ["-ss", candidate["frame_time"], "-i", video, "-vf", f"format=rgb24,crop={crop}",
              "-frames:v", 1, workdir / candidate["file"]],
             FRAME_TIMEOUT,
         )

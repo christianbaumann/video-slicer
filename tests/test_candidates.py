@@ -79,3 +79,48 @@ def test_bad_segments_file_fails_briefly(synthetic_talk, tmp_path, content):
     assert result.returncode != 0
     assert "Traceback" not in result.stderr
     assert result.stderr.startswith("error:")
+
+
+ODD_CROP = "801:601:3:5"
+FIRST_SLIDE = (0x20, 0x30, 0x40)
+THIRD_SLIDE = (0x20, 0x40, 0x20)
+BLACK = (0, 0, 0)
+TILE_INSET = 10
+
+
+def tile_pixel(workdir, row, column):
+    height = candidates.THUMBNAIL_WIDTH * 3 // 4
+    return pixel(workdir / "contact-sheet.png",
+                 column * candidates.THUMBNAIL_WIDTH + TILE_INSET, row * height + TILE_INSET)
+
+
+def close(actual, expected):
+    return all(abs(a - b) <= COLOR_TOLERANCE for a, b in zip(actual, expected))
+
+
+def run_with_segments(video, workdir, segments, crop=CROP):
+    (workdir / "segments.json").write_text(json.dumps(segments))
+    result = run_cli(video, "--workdir", workdir, "--crop", crop)
+    assert result.returncode == 0, result.stderr
+
+
+def test_rerun_with_fewer_segments_drops_stale_frames(synthetic_talk, tmp_path):
+    run_with_segments(synthetic_talk, tmp_path, segs(*[(11 + i, 12 + i) for i in range(4)]))
+    run_with_segments(synthetic_talk, tmp_path, segs((21, 22), (23, 24)))
+    assert sorted(p.name for p in (tmp_path / "candidates").glob("*.png")) == ["0001.png", "0002.png"]
+    assert close(tile_pixel(tmp_path, 0, 1), THIRD_SLIDE)
+    assert close(tile_pixel(tmp_path, 0, 2), BLACK)
+
+
+def test_odd_crop_keeps_exact_dimensions(synthetic_talk, tmp_path):
+    run_with_segments(synthetic_talk, tmp_path, segs((0, 9.96)), ODD_CROP)
+    info = run_ffmpeg(["-i", tmp_path / "candidates" / "0001.png", "-f", "null", "-"], 30)
+    assert "801x601" in info
+
+
+def test_partly_filled_last_row_maps_tiles_by_colour(synthetic_talk, tmp_path):
+    first_row = [(i, i + 1) for i in range(8)]
+    run_with_segments(synthetic_talk, tmp_path, segs(*first_row, (21, 22)))
+    assert close(tile_pixel(tmp_path, 0, 7), FIRST_SLIDE)
+    assert close(tile_pixel(tmp_path, 1, 0), THIRD_SLIDE)
+    assert close(tile_pixel(tmp_path, 1, 1), BLACK)

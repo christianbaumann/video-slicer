@@ -1,5 +1,7 @@
 import subprocess
 
+PROBE_TIMEOUT = 30
+
 
 class MediaToolError(Exception):
     pass
@@ -25,7 +27,7 @@ def run_ffmpeg(args, timeout):
     return _run(["ffmpeg", "-hide_banner", "-nostdin", "-y", *map(str, args)], timeout).stderr
 
 
-def probe_duration(video, timeout=30):
+def probe_duration(video, timeout=PROBE_TIMEOUT):
     command = [
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1", str(video),

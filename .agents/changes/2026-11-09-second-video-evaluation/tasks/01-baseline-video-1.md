@@ -1,6 +1,9 @@
 ---
 id: 01
 dependencies: []
+status: in-progress
+owner: s-9c2e
+branch: task/2026-11-09-second-video-evaluation-01
 ---
 
 # Task 01: Baseline video 1

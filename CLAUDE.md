@@ -4,13 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Design only: no code, tests or build commands exist yet. Design and evaluation results: `.agents/changes/2026-11-09-video-slicer-skill/design.md`.
+Implemented. Design and evaluation results: `.agents/changes/2026-11-09-video-slicer-skill/design.md`.
+
+## Commands
+
+- Tests: `uv run pytest` (needs ffmpeg and ffprobe on `PATH`)
+- Run: follow `.claude/skills/video-slicer/SKILL.md`. Scripts: `python3 .claude/skills/video-slicer/scripts/{samples,detect,candidates,export}.py`, each with `--help`.
 
 ## Purpose
 
 A Claude Code skill that turns a recording of a talk or lecture into one cropped PNG per relevant content change, usually one per slide.
 
-## Architecture (planned)
+## Architecture
 
 `.claude/skills/video-slicer/SKILL.md` holds the judgement steps. Small scripts in `.claude/skills/video-slicer/scripts/` (standard library only, pytest) hold the ffmpeg calls and output parsing. They exchange data only through files in a work directory.
 

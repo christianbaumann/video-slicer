@@ -1,6 +1,9 @@
 ---
 id: 03
 dependencies: []
+status: in-progress
+owner: s-9c2e
+branch: task/2026-11-09-second-video-evaluation-03
 ---
 
 # Task 03: Demo frame rule

@@ -5,6 +5,9 @@ dependencies:
 - 03
 - 04
 - 05
+status: in-progress
+owner: s-a41c
+branch: task/2026-11-09-video-slicer-skill-06
 ---
 
 # Task 06: Skill workflow

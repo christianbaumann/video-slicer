@@ -1,6 +1,9 @@
 ---
 id: 01
 dependencies: []
+status: in-progress
+owner: s-a41c
+branch: task/2026-11-09-video-slicer-skill-01
 ---
 
 # Task 01: Foundation

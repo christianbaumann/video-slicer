@@ -24,12 +24,13 @@ Pipeline:
 1. ffmpeg extracts 10 to 12 evenly spaced frames. Claude finds the crop box from a montage.
 2. ffmpeg runs `crop` + `freezedetect` on the video. Each stable segment is one candidate.
 3. ffmpeg extracts the frame 0.5 s before each segment ends and builds one contact sheet.
-4. Claude reads the sheet and drops frames with no slide, repeats, and earlier steps of a slide build.
+4. Claude reads the sheet and drops frames with no slide, live demo frames, repeats, and earlier steps of a slide build.
 
 ## Non-obvious facts
 
 - `select=scene` loses small changes such as one new bullet, and `cropdetect` cannot find a slide area. Do not replace `freezedetect` or Claude's crop step with them.
 - `freezedetect` defaults are `n=-50dB`, `d=2`. `-30dB` merged different dark slides on the test recording.
+- `freezedetect` with `d=2` misses slides shown for under 2 s. On video 2, six slides shown 0.5 to 2 s each (2086 to 2094 s) get no segment. `d=0.5` finds them but raises candidates from 52 to 113 on video 1 and from 137 to 282 on video 2, mostly camera and demo frames. `d` stays 2 by decision.
 - The last segment can have no `freeze_end`. Use the video duration.
 - The installed ffmpeg has no `drawtext` filter. Contact sheets use `tile`, and grid positions map to candidates.
 

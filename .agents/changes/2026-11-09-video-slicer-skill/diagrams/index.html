@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>video-slicer brainstorm</title>
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 1040px; margin: 0 auto; padding: 24px 16px; color: #222; background: #fff; }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  h2 { font-size: 18px; margin-top: 32px; }
+  img { max-width: 100%; height: auto; display: block; margin: 8px 0; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+  tr.recommended { background: #eef6ec; font-weight: 600; }
+  .legend span { padding: 2px 8px; margin-right: 8px; border: 1px solid #999; border-radius: 4px; color: #222; }
+</style>
+</head>
+<body>
+<h1>video-slicer: proposed pipeline</h1>
+<p>Decided: option B. ffmpeg does the comparison, so no 1 fps PNG export and no custom diff script.</p>
+<img src="pipeline.png" alt="ffmpeg extracts about 10 sample frames. Claude finds the crop box. ffmpeg crops and runs freezedetect to get stable segments. ffmpeg extracts the last frame of each segment. Claude drops duplicates and non-slides. Output is cropped PNGs.">
+
+<h2>Test result: synthetic 30 s video</h2>
+<p>Content: slide changes at 10 s and 20 s, a small bullet appears at 5 s, a speaker box moves outside the crop, noise on all frames. A real recording can give different results.</p>
+<table>
+  <tr><th>ffmpeg filter</th><th>Result</th><th>Conclusion</th></tr>
+  <tr><td><code>select=scene</code></td><td>Slide changes score 1.0. Bullet scores 0.017, noise scores 0.018.</td><td>Misses small changes</td></tr>
+  <tr class="recommended"><td><code>crop + freezedetect</code></td><td>4 segments, with boundaries at 5 s, 10 s and 20 s</td><td>Finds all changes</td></tr>
+  <tr><td><code>cropdetect</code></td><td>Returns the full frame, 1280x720</td><td>Cannot find the slide area</td></tr>
+</table>
+
+<h2>Remaining decisions: recommendations</h2>
+<table>
+  <tr><th>#</th><th>Topic</th><th>Recommended</th><th>Rejected</th></tr>
+  <tr><td>2</td><td>Change detection</td><td><code>crop + freezedetect</code></td><td>Scene score: misses small changes. PNG export + diff script: more code, no gain shown.</td></tr>
+  <tr><td>3</td><td>Frame to keep</td><td>Last frame of each stable segment</td><td>First frame: can catch a transition.</td></tr>
+  <tr><td>4</td><td>Slide builds (bullets appear one by one)</td><td>Keep only the final state</td><td>Keep each step: many near-duplicates.</td></tr>
+  <tr><td>5</td><td>Layout changes during the talk</td><td>One crop box per video. Claude drops frames with no slide and warns about other layouts.</td><td>One crop box per time range: add only if real videos need it.</td></tr>
+  <tr><td>6</td><td>Packaging</td><td><code>.claude/skills/video-slicer/SKILL.md</code> + <code>scripts/slice.py</code> (standard library only, pytest)</td><td>Shell script: output parsing is hard to test. Installed package: not necessary.</td></tr>
+  <tr><td>7</td><td>Output</td><td><code>&lt;video&gt;-slices/0001_00-12-34.png</code> next to the video</td><td>Added JSON index: no use case yet.</td></tr>
+  <tr><td>8</td><td>Tesseract OCR</td><td>Not in v1</td><td>OCR compare: Claude already reads the candidates.</td></tr>
+</table>
+
+<details>
+<summary>Question 1: Who examines the frames? (decided: B)</summary>
+<p>Example: a 45-minute talk at 1 frame per second gives 2,700 frames. If Claude reads all of them, the estimated cost is 3.3M image tokens at 720p and 830k at 360p.</p>
+<p class="legend">
+  <span style="background:#dae8fc">Tool or script</span>
+  <span style="background:#ffe6cc">Claude</span>
+  <span style="background:#d5e8d4">Output</span>
+</p>
+
+<h2>A: Claude reads every frame</h2>
+<img src="option-a.png" alt="Video to ffmpeg 1 fps export to Claude reading all frames to cropped PNGs">
+<p>This is the simplest to build. The cost is too high for each video.</p>
+
+<h2>B: Script filters, Claude decides (recommended)</h2>
+<img src="option-b.png" alt="ffmpeg exports frames. Claude finds the crop box from about 10 samples. A script crops and diffs all frames into 50 to 100 candidates. Claude keeps or drops unclear candidates. Output is cropped PNGs.">
+<p>The script compares pixels. Claude does only the work that needs judgement: it finds the crop box and decides unclear changes, such as an animation step or a new slide.</p>
+
+<h2>C: Script only</h2>
+<img src="option-c.png" alt="Video to ffmpeg 1 fps export to script detecting crop and image diff to cropped PNGs">
+<p>This needs no AI. Crop detection fails on layouts it does not expect, such as a picture-in-picture speaker or a changing stage view.</p>
+
+<h2>Comparison</h2>
+<table>
+  <tr><th>Option</th><th>Accuracy on unusual layouts</th><th>Token cost</th><th>Speed</th><th>Repeatable</th></tr>
+  <tr><td>A: Claude reads every frame</td><td>High</td><td>Very high</td><td>Slow</td><td>No</td></tr>
+  <tr class="recommended"><td>B: Script filters, Claude decides</td><td>High</td><td>Low</td><td>Fast</td><td>Mostly</td></tr>
+  <tr><td>C: Script only</td><td>Low</td><td>None</td><td>Fastest</td><td>Yes</td></tr>
+</table>
+</details>
+</body>
+</html>

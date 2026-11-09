@@ -1,0 +1,32 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="t1" value="01 Foundation&#10;media.py, conftest.py,&#10;pyproject.toml" style="rounded=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="0" y="125" width="190" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="t2" value="02 Sample frames&#10;samples.py" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="280" y="0" width="190" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="t3" value="03 Detect segments&#10;detect.py" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="280" y="90" width="190" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="t4" value="04 Build candidates&#10;candidates.py" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="280" y="180" width="190" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="t5" value="05 Export slices&#10;export.py" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="280" y="270" width="190" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="t6" value="06 Skill workflow&#10;SKILL.md, CLAUDE.md,&#10;README.md" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="560" y="125" width="190" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="t1" target="t2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t1" target="t3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t1" target="t4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="t1" target="t5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b2" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="t2" target="t6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t3" target="t6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="t4" target="t6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="b5" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="t5" target="t6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

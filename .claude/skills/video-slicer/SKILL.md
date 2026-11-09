@@ -62,9 +62,9 @@ Read `contact-sheet.png`. Decide per candidate. Drop:
 - Frames with no slide: full-screen speaker, audience, Q&A or screen-share pages, black or transition frames.
 - Live demo frames: IDE, terminal or browser content that fills the shared screen. Keep a slide that shows a screenshot or code inside slide layout (a slide title, footer or logo).
 - Repeats: the same slide as an earlier kept candidate (a camera cut can split one slide into several segments). Keep the earliest.
-- Earlier steps of a slide build: keep only the final state (the last of the build) and drop the steps before it.
+- Earlier steps of a slide build: the same slide as a later candidate with content added (same title or layout, every element of the earlier frame still present). Check this against the later frame, with PSNR when unsure. Keep only the final state.
 
-Keep every other candidate, including slides that look similar but differ in content (for example several dark slides in a row).
+Drop only for a reason named above. Keep every other candidate, including break or pause slides and slides that look similar but differ in content (for example several dark slides in a row).
 
 The 320 px thumbnails are small. Re-read groups of 12 at 480 px when titles or progress markers are unreadable (`N` is the first candidate number, then 13, 25, ...):
 

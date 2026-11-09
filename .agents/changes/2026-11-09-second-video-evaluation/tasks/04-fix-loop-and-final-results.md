@@ -4,6 +4,9 @@ dependencies:
 - 01
 - 02
 - 03
+status: in-progress
+owner: s-9c2e
+branch: task/2026-11-09-second-video-evaluation-04
 ---
 
 # Task 04: Fix loop and final results

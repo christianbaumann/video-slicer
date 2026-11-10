@@ -1,6 +1,9 @@
 ---
 id: 01
 dependencies: []
+status: in-progress
+owner: s-3c9e
+branch: task/2026-11-10-score-page-regions-01
 ---
 
 # Task 01: Test .mkv input

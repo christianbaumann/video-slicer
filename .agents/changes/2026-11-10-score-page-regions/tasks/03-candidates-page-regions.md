@@ -1,6 +1,9 @@
 ---
 id: 03
 dependencies: []
+status: in-progress
+owner: s-3c9e
+branch: task/2026-11-10-score-page-regions-03
 ---
 
 # Task 03: Candidates per page region with same-as hint

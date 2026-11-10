@@ -1,6 +1,9 @@
 ---
 id: 02
 dependencies: []
+status: in-progress
+owner: s-3c9e
+branch: task/2026-11-10-score-page-regions-02
 ---
 
 # Task 02: Detect segments per page region

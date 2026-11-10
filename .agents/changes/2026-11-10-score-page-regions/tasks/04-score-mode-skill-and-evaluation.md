@@ -3,6 +3,9 @@ id: 04
 dependencies:
 - 02
 - 03
+status: in-progress
+owner: s-3c9e
+branch: task/2026-11-10-score-page-regions-04
 ---
 
 # Task 04: Score mode in SKILL.md and evaluation on the Metal video

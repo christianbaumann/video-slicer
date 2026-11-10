@@ -40,6 +40,8 @@ ffmpeg -y -i samples/s01.png -vf "crop=100:60:X1:Y1,scale=400:240:flags=neighbor
 ffmpeg -y -i tl.png -i tr.png -i bl.png -i br.png -filter_complex "[0][1]hstack[a];[2][3]hstack[b];[a][b]vstack" corners.png
 ```
 
+With two boxes, do this per box. If a box touches the frame edge (for example `Y=0` or full height), the outward shift is impossible: crop from the edge instead and check against the frame edge.
+
 Read `corners.png`. A cell shows 100x60 video pixels at 4x, so video position = crop origin + cell offset / 4. Move the box until no border, speaker or background remains inside and no slide content is cut. Repeat on a second sample if a corner is unclear.
 
 ## 3. Detect stable segments
@@ -85,9 +87,16 @@ If that still does not show whether two candidates differ (small text, one extra
 
 With one crop box per page, each candidate is one page and the start time gives the reading order. Also drop:
 
-- Frames without a full score page, for example the cover shown cut in half or in the centre. Name them in the report.
+- Frames without a full score page, for example a cover shown cut in half or in the centre. A centred cover spans both regions and gives one candidate per region: drop both and name the cover once in the report.
 - Frames caught during a page-curl animation (page partly turned or blurred).
 - Candidates marked `same-as #M`, after a check: compare with candidate #M (PSNR, or both full-size frames). Keep the candidate if a note, bar or page number differs.
+- Repeats without the hint (PSNR can be 38 to 40 dB). Two candidates with the same printed page number are one page: keep the first.
+
+Use the printed page number as the check. Thumbnails are too small to read it, so tile the footer crops of 44 candidates at a time (`N` is the first candidate number; adjust `W:H:X:Y` to the page number text of the page box, and `tile` to the candidate count):
+
+```bash
+ffmpeg -y -framerate 1 -start_number N -i "$WORK/candidates/%04d.png" -vf "crop=W:H:X:Y,scale=320:-2,tile=4x11" -frames:v 1 "$WORK/foot-N.png"
+```
 
 Keep a page that looks similar to another but differs in content.
 

@@ -21,6 +21,8 @@ Output: `<video>-slices/0001_00-12-34.png`, ... next to the video. The number gi
 
 One crop box is used for the whole video. If the samples show other slide layouts, Claude warns you.
 
+`.mp4` and `.mkv` videos work. For a score video with two pages side by side, Claude sets one crop box per page and the output has one PNG per page in reading order. It drops the cover if it is not a full page, page-curl frames, and pages that repeat the previous page of the same side.
+
 Limit: slides shown for under 2 s (for example flipped through quickly) get no candidate. Lower `--min-seconds` in `detect.py` finds them but multiplies the candidates.
 
 ## Evaluation

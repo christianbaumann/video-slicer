@@ -9,7 +9,7 @@ Needs `ffmpeg`, `ffprobe` and `python3`. `SCRIPTS` below is the `scripts/` folde
 
 Defaults unless the user says otherwise:
 
-- Output: `<video>-slices/` next to the video, e.g. `talk.mp4` gives `talk-slices/`.
+- Output: `<video>-slices/` next to the video, e.g. `talk.mp4` or `talk.mkv` gives `talk-slices/`.
 - Work directory: a new temp directory (`WORK=$(mktemp -d)`), removed after export.
 
 Step 3 takes about 30 s for a 44 min video. Give it a timeout of at least 10 minutes.
@@ -24,10 +24,13 @@ Read `$WORK/montage.png` (12 frames, 4 columns, evenly spaced). Check:
 
 - Where the slides are. Ignore speaker box, conference frame, logos.
 - Whether all slides share one layout. If some samples show another layout (different slide area, slides in a different position), warn the user: one crop box is used for the whole video, and slides in other layouts are cut off or missed. Continue only with the main layout.
+- Whether the frames show two pages side by side (a score). Then step 2 sets one crop box per page.
 
 ## 2. Find the crop box
 
 Estimate `W:H:X:Y` in video pixels from the montage (each thumbnail is 480 px wide, so multiply by video width / 480). The box lies inside any slide border and is 16:9 for most slides.
+
+For two pages side by side, find one box per page, left first, both with the same `W:H`. Pass all boxes, in that order, to steps 3 and 4. Region 0 is the left page, region 1 the right page.
 
 Verify the corners at 4x. Crop a 100x60 area around each corner of the box (box corner shifted outward by 20 px, so the border is visible) and join the four into one image:
 
@@ -47,6 +50,8 @@ python3 "$SCRIPTS/detect.py" "<video>" --workdir "$WORK" --crop W:H:X:Y
 
 Writes `segments.json`. Each stable segment is one candidate. Defaults: `--noise-db -50 --min-seconds 2`. Do not loosen the noise value to `-30`: it merges different dark slides. A slide shown for under 2 s is not found.
 
+With several page boxes, repeat `--crop` once per box (same order as in step 2).
+
 ## 4. Build the contact sheet
 
 ```bash
@@ -54,6 +59,8 @@ python3 "$SCRIPTS/candidates.py" "<video>" --workdir "$WORK" --crop W:H:X:Y
 ```
 
 Prints one line per candidate: `row R column C: #N HH:MM:SS`. Rows and columns are zero-based in `$WORK/contact-sheet.png` (8 columns). No numbers are printed on the sheet, so count grid positions and use the printed map.
+
+With several page boxes, repeat `--crop` as in step 3. Each line then ends in `region R` (0 = first box). A line ends in `same-as #M (NN dB)` when the frame matches the previous candidate of its region at 40 dB or more.
 
 ## 5. Review
 
@@ -73,6 +80,16 @@ ffmpeg -y -framerate 1 -start_number N -i "$WORK/candidates/%04d.png" -vf "scale
 ```
 
 If that still does not show whether two candidates differ (small text, one extra bullet), read the full-size frames `$WORK/candidates/NNNN.png` of both, or compare them: `ffmpeg -i A.png -i B.png -lavfi psnr -f null -` (about 40 dB or more means the same slide, below 20 dB means different content). Do not guess.
+
+### Scores
+
+With one crop box per page, each candidate is one page and the start time gives the reading order. Also drop:
+
+- Frames without a full score page, for example the cover shown cut in half or in the centre. Name them in the report.
+- Frames caught during a page-curl animation (page partly turned or blurred).
+- Candidates marked `same-as #M`, after a check: compare with candidate #M (PSNR, or both full-size frames). Keep the candidate if a note, bar or page number differs.
+
+Keep a page that looks similar to another but differs in content.
 
 ## 6. Export
 

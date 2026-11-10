@@ -26,6 +26,12 @@ def parse_segments(output, duration):
     return segments
 
 
+def tag_and_sort(regions):
+    tagged = [{**segment, "region": region}
+              for region, segments in enumerate(regions) for segment in segments]
+    return sorted(tagged, key=lambda segment: (segment["start"], segment["region"]))
+
+
 def detect_segments(video, crop, noise_db, min_seconds):
     filters = f"crop={crop},freezedetect=n={noise_db}dB:d={min_seconds},metadata=print"
     output = run_ffmpeg(["-i", video, "-vf", filters, "-an", "-f", "null", "-"], DETECT_TIMEOUT)
@@ -36,14 +42,17 @@ def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("video")
     parser.add_argument("--workdir", required=True)
-    parser.add_argument("--crop", required=True, help="W:H:X:Y")
+    parser.add_argument("--crop", required=True, action="append",
+                        help="W:H:X:Y, repeat for several page regions")
     parser.add_argument("--noise-db", type=float, default=DEFAULT_NOISE_DB)
     parser.add_argument("--min-seconds", type=float, default=DEFAULT_MIN_SECONDS)
     args = parser.parse_args(argv)
-    if not CROP_PATTERN.fullmatch(args.crop):
+    if not all(CROP_PATTERN.fullmatch(crop) for crop in args.crop):
         parser.error("--crop must look like W:H:X:Y with integers")
     try:
-        segments = detect_segments(args.video, args.crop, args.noise_db, args.min_seconds)
+        segments = tag_and_sort(
+            [detect_segments(args.video, crop, args.noise_db, args.min_seconds)
+             for crop in args.crop])
     except MediaToolError as error:
         sys.exit(f"error: {error}")
     workdir = Path(args.workdir)

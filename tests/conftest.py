@@ -48,3 +48,33 @@ def synthetic_talk(tmp_path_factory):
         GENERATION_TIMEOUT,
     )
     return path
+
+
+PAGE_SIZE = (600, 700)
+PAGE_Y = 10
+PAGE_X = {"left": 20, "right": 660}
+SCORE_DURATION = 50
+PAGE_COLORS = {
+    "left": (("0x203040", 0), ("0x202080", 10), ("0x204020", 30), ("0x802020", 40)),
+    "right": (("0x406040", 0), ("0x604060", 20), ("0x806020", 40)),
+}
+
+
+def _page_filter(side):
+    width, height = PAGE_SIZE
+    return [f"drawbox=x={PAGE_X[side]}:y={PAGE_Y}:w={width}:h={height}:color={color}:t=fill"
+            f":enable='gte(t,{start})'" for color, start in PAGE_COLORS[side]]
+
+
+@pytest.fixture(scope="session")
+def synthetic_score(tmp_path_factory):
+    path = tmp_path_factory.mktemp("score") / "score.mp4"
+    pages = ",".join([*_page_filter("left"), *_page_filter("right"),
+                      f"noise=alls={NOISE_STRENGTH}:allf=t+u"])
+    run_ffmpeg(
+        ["-f", "lavfi", "-i",
+         f"color=c={BACKGROUND_COLOR}:s={WIDTH}x{HEIGHT}:r=10:d={SCORE_DURATION}",
+         "-vf", pages, "-pix_fmt", "yuv420p", path],
+        GENERATION_TIMEOUT,
+    )
+    return path

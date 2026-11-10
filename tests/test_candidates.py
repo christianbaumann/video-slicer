@@ -124,3 +124,82 @@ def test_partly_filled_last_row_maps_tiles_by_colour(synthetic_talk, tmp_path):
     assert close(tile_pixel(tmp_path, 0, 7), FIRST_SLIDE)
     assert close(tile_pixel(tmp_path, 1, 0), THIRD_SLIDE)
     assert close(tile_pixel(tmp_path, 1, 1), BLACK)
+
+
+LEFT_CROP = "300:100:500:0"
+RIGHT_CROP = "300:100:970:0"
+GRAY = (0x30, 0x30, 0x30)
+
+
+def region(number, region_index, start=0):
+    return {"number": number, "region": region_index, "file": f"{number}.png", "start": start,
+            "row": 0, "column": number - 1}
+
+
+def test_same_as_points_to_previous_candidate_of_same_region():
+    items = [region(1, 0), region(2, 1), region(3, 0), region(4, 1)]
+    scores = {("1.png", "3.png"): 45.0, ("2.png", "4.png"): 12.0}
+    candidates.mark_same_as(items, lambda a, b: scores[(a, b)])
+    assert [c["same_as"] for c in items] == [None, None, 1, None]
+    assert [c["psnr"] for c in items] == [None, None, 45.0, 12.0]
+
+
+def test_same_as_threshold_is_inclusive():
+    items = [region(1, 0), region(2, 0)]
+    candidates.mark_same_as(items, lambda a, b: candidates.SAME_AS_MIN_DB)
+    assert items[1]["same_as"] == 1
+
+
+def test_map_shows_region_only_with_several_crops_and_same_as_always():
+    item = {**region(4, 1, 28), "same_as": 2, "psnr": 45.2}
+    assert candidates.format_map([item], 2) == "row 0 column 3: #4 00:00:28 region 1 same-as #2 (45 dB)"
+    assert candidates.format_map([item], 1) == "row 0 column 3: #4 00:00:28 same-as #2 (45 dB)"
+    assert candidates.format_map([{**item, "same_as": None}], 1) == "row 0 column 3: #4 00:00:28"
+
+
+def run_regions(video, workdir, segments, *crops):
+    (workdir / "segments.json").write_text(json.dumps(segments))
+    return run_cli(video, "--workdir", workdir, *[arg for c in crops for arg in ("--crop", c)])
+
+
+def test_two_crops_cut_each_candidate_from_its_region(synthetic_talk, tmp_path):
+    segments = [{"start": 0, "end": 9.96, "region": 0}, {"start": 0, "end": 9.96, "region": 1},
+                {"start": 10, "end": 19.96, "region": 0}, {"start": 22, "end": 29, "region": 1}]
+    result = run_regions(synthetic_talk, tmp_path, segments, LEFT_CROP, RIGHT_CROP)
+    assert result.returncode == 0, result.stderr
+    files = [tmp_path / f"candidates/{n:04d}.png" for n in range(1, 5)]
+    assert close(pixel(files[0], 10, 10), FIRST_SLIDE)
+    assert close(pixel(files[1], 10, 10), GRAY)
+    assert close(pixel(files[2], 10, 10), BLUE)
+    assert close(pixel(files[3], 10, 10), GRAY)
+    assert "region 1" in result.stdout
+
+
+def test_same_as_set_for_unchanged_region_and_not_after_change(synthetic_talk, tmp_path):
+    segments = [{"start": 0, "end": 9.96, "region": 0}, {"start": 0, "end": 9.96, "region": 1},
+                {"start": 12, "end": 19.96, "region": 0}, {"start": 12, "end": 19.96, "region": 1}]
+    result = run_regions(synthetic_talk, tmp_path, segments, LEFT_CROP, RIGHT_CROP)
+    assert result.returncode == 0, result.stderr
+    data = json.loads((tmp_path / "candidates.json").read_text())
+    assert [c["same_as"] for c in data] == [None, None, None, 2]
+    assert data[3]["psnr"] >= candidates.SAME_AS_MIN_DB
+    assert data[2]["psnr"] < candidates.SAME_AS_MIN_DB
+    assert "same-as #2" in result.stdout
+
+
+def test_single_crop_map_has_no_region_text(synthetic_talk, tmp_path):
+    result = run_regions(synthetic_talk, tmp_path, segs((0, 9.96)), CROP)
+    assert result.returncode == 0, result.stderr
+    assert "region" not in result.stdout
+
+
+@pytest.mark.parametrize("segments, crops", [
+    (segs((0, 5)), ["300:100:0:0", "200:100:0:0"]),
+    ([{"start": 0, "end": 5, "region": 2}], [LEFT_CROP, RIGHT_CROP]),
+    ([{"start": 0, "end": 5, "region": 1}], [LEFT_CROP]),
+])
+def test_bad_crops_or_regions_fail_briefly(synthetic_talk, tmp_path, segments, crops):
+    result = run_regions(synthetic_talk, tmp_path, segments, *crops)
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr
+    assert result.stderr.startswith("error:")
